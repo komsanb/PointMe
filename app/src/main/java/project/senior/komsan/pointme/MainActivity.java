@@ -1,18 +1,16 @@
 package project.senior.komsan.pointme;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.StrictMode;
+import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TabHost;
@@ -23,8 +21,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.Objects;
+import org.w3c.dom.Document;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends FragmentActivity{
@@ -33,6 +34,35 @@ public class MainActivity extends FragmentActivity{
     Marker mMarker;
     LocationManager lm;
     double lat, lng;
+    LocationListener listener = new LocationListener() {
+        public void onLocationChanged(Location loc) {
+            LatLng coordinate = new LatLng(loc.getLatitude()
+                    , loc.getLongitude());
+            lat = loc.getLatitude();
+            lng = loc.getLongitude();
+
+            if (mMarker != null)
+                mMarker.remove();
+
+            mMarker = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(lat, lng)));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    coordinate, 16));
+        }
+
+        public void onStatusChanged(String provider, int status
+                , Bundle extras) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onProviderDisabled(String provider) {
+        }
+    };
+    Direction md;
+    LatLng startPosition = new LatLng(13.687140112679154, 100.53525868803263);
+    LatLng endPosition = new LatLng(13.683660045847258, 100.53900808095932);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +71,7 @@ public class MainActivity extends FragmentActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mMap = ((SupportMapFragment)getSupportFragmentManager()
+        mMap = ((SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
 
@@ -97,39 +127,42 @@ public class MainActivity extends FragmentActivity{
 //                    startActivity(intent);
 //                }
 //
-//                if (tabId.equals("direction")){
-//
-//                    Intent intent = new Intent(getApplication(), Direction.class);
-//                    startActivity(intent);
-//                }
+                if (tabId.equals("direction")) {
+                    if (android.os.Build.VERSION.SDK_INT > 9) {
+                        StrictMode.ThreadPolicy policy
+                                = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                        StrictMode.setThreadPolicy(policy);
+                    }
 
+                    md = new Direction();
+                    mMap = ((SupportMapFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.map)).getMap();
 
+                    LatLng coordinates = new LatLng(13.685400079263206, 100.537133384495975);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 16));
 
+                    mMap.addMarker(new MarkerOptions().position(startPosition).title("Start"));
+                    mMap.addMarker(new MarkerOptions().position(endPosition).title("End"));
+
+                    Document doc = md.getDocument(startPosition
+                            , endPosition, Direction.MODE_DRIVING);
+                    int duration = md.getDurationValue(doc);
+                    String distance = md.getDistanceText(doc);
+                    String start_address = md.getStartAddress(doc);
+                    String copy_right = md.getCopyRights(doc);
+
+                    ArrayList<LatLng> directionPoint = md.getDirection(doc);
+                    PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.BLUE).geodesic(true);
+
+                    for (int i = 0; i < directionPoint.size(); i++) {
+                        rectLine.add(directionPoint.get(i));
+                    }
+
+                    mMap.addPolyline(rectLine);
+                }
             }
         });
     }
-
-    LocationListener listener = new LocationListener() {
-        public void onLocationChanged(Location loc) {
-            LatLng coordinate = new LatLng(loc.getLatitude()
-                    , loc.getLongitude());
-            lat = loc.getLatitude();
-            lng = loc.getLongitude();
-
-            if(mMarker != null)
-                mMarker.remove();
-
-            mMarker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(lat, lng)));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    coordinate, 16));
-        }
-
-        public void onStatusChanged(String provider, int status
-                , Bundle extras) {}
-        public void onProviderEnabled(String provider) {}
-        public void onProviderDisabled(String provider) {}
-    };
 
     public void onResume() {
         super.onResume();
