@@ -11,8 +11,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 
-import com.google.android.gms.maps.GoogleMap;
-
 /**
  * Shows a list that can be filtered in-place with a SearchView in non-iconified mode.
  */
@@ -22,7 +20,6 @@ public class Search extends FragmentActivity implements SearchView.OnQueryTextLi
     private SearchView mSearchView;
     private ListView mListView;
     private ImageButton imageButton;
-    private GoogleMap googleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +51,6 @@ public class Search extends FragmentActivity implements SearchView.OnQueryTextLi
                 if (id == 0) {
 
                 }
-
             }
         });
     }

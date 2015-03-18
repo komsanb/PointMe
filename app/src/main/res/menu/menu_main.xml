@@ -1,9 +1,24 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/menu_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:title="@string/menu_settings"/>
+        android:title="@string/menu_settings" />
+    <item
+        android:id="@+id/item_movies"
+        android:showAsAction="ifRoom|withText"
+        android:title="Movies"
+        android:visible="true" />
+    <item
+        android:id="@+id/item_music"
+        android:showAsAction="ifRoom|withText"
+        android:title="Music"
+        android:visible="true" />
+    <item
+        android:id="@+id/item_comedy"
+        android:showAsAction="ifRoom|withText"
+        android:title="Comedy"
+        android:visible="true" />
 
 </menu>
